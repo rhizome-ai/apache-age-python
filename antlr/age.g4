@@ -28,7 +28,7 @@ KW_PATH : '::path';
 
 // Common Values Rule
 value
-   : STRING
+   : strip(STRING)
    | NUMBER
    | properties
    | arr
