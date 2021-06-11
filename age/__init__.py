@@ -13,4 +13,4 @@ def newAge(dsn=None, graph=None, connection_factory=None, cursor_factory=None, *
         return ag
 
 # Dummy ResultHandler
-printRawHandler = DummyResultHandler()
+rawPrinter = DummyResultHandler()

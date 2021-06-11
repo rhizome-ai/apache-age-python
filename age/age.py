@@ -76,7 +76,10 @@ class Age:
         
     def execSql(self, stmt, *args):
         self._checkReady()
-        self.cursor.execute(stmt, *args)
+        try:
+            self.cursor.execute(stmt, *args)
+        except Exception as cause:
+            raise SqlExcutionError(stmt,cause)
         return self.cursor
         
 
@@ -89,7 +92,8 @@ class Age:
         return self.execSql(stmt, *args)
         
 
-    def queryCypher(self, cypherStmt, resultHandler:ResultHandler=None, formatter:Formatter=None, *args):
-        cur = self.execCypher(cypherStmt, *args)
-        return buildResult(cur, resultHandler=resultHandler, formatter=formatter)
-
+    def queryCypher(self, cypherStmt, *args):
+        return self.execCypher(cypherStmt, *args)
+        
+    def buildGraph(self, cursor, resultHandler:ResultHandler=None):
+        return buildResult(cursor, resultHandler)
