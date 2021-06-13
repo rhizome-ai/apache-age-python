@@ -1,7 +1,7 @@
 import psycopg2 
 from psycopg2 import errors
 from .exceptions import *
-from .graph_builder import buildResult, ResultHandler, Formatter
+from .builder import buildGraph, getRows, ResultHandler 
 
 
 _EXCEPTION_NoConnection = NoConnection()
@@ -20,10 +20,15 @@ class Age:
         cursor = conn.cursor()
         self.conn = conn
         self.cursor = cursor
-        self.cursor.execute("LOAD 'age'")
+        self.cursor.execute("LOAD 'age';")
         self.cursor.execute("SET search_path = ag_catalog, '$user', public;")
         if graph != None:
-            self.setGraph(graph)
+            try :
+                self.setGraph(graph)
+            except GraphNotFound:
+                self.createGraph(graph)
+                self.setGraph(graph)
+
         return self
 
     def close(self):
@@ -48,7 +53,7 @@ class Age:
         if self.graphExists(graphName) :
             raise GraphAlreadyExists(graphName)
         else:
-            self.cursor.execute("SELECT create_graph(%s)", (graphName,))
+            self.cursor.execute("SELECT create_graph(%s);", (graphName,))
 
     def newCursor(self):
         self.cursor.close()
@@ -69,20 +74,20 @@ class Age:
             
 
     def commit(self):
-        self.cursor.commit()
+        self.conn.commit()
         
     def rollback(self):
-        self.cursor.rollback()
+        self.conn.rollback()
         
     def execSql(self, stmt, *args):
         self._checkReady()
         try:
             self.cursor.execute(stmt, *args)
+            return self
         except Exception as cause:
             raise SqlExcutionError(stmt,cause)
-        return self.cursor
         
-
+    
     def execCypher(self, cypherStmt, *args):
         self._checkGraphName()
         stmt = "SELECT * from cypher('"+self.graphName+"', $$ "+cypherStmt+" $$) as (v agtype);"
@@ -94,6 +99,10 @@ class Age:
 
     def queryCypher(self, cypherStmt, *args):
         return self.execCypher(cypherStmt, *args)
-        
-    def buildGraph(self, cursor, resultHandler:ResultHandler=None):
-        return buildResult(cursor, resultHandler)
+    
+    def graph(self, resultHandler:ResultHandler=None):
+        return buildGraph(self.cursor, resultHandler)
+
+    def rows(self):
+        return getRows(self.cursor)
+    

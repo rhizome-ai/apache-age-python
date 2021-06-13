@@ -2,17 +2,24 @@
 Python driver for Apache AGE, graph extention for PostgreSQL.
 
 
-### Build
-#### 1) Generate query result data parser with ANTLR4
+### Install
+This driver runs on [psycopg2](https://www.psycopg.org/) and [antlr4-python3](https://pypi.org/project/antlr4-python3-runtime/)
 ```
-# prerequisites : 
-#    - java over 8
-#    - download ANTLR4 from https://www.antlr.org/download/antlr-4.9.2-complete.jar
-#    - java -cp antlr-4.9.2-complete.jar org.antlr.v4.Tool  -Dlanguage=Python3 -visitor -o ./age/gen antlr/age.g4 
+sudo apt-get update
+sudo apt-get install python3-dev libpq-dev
+pip install --no-binary :all: psycopg2
+pip install antlr4-python3-runtime
+
+pip install apache_age_py
 ```
 
-#### 2) Python3 Runtime
+### Check AGE loaded in your PostgreSQL
+Connect to your containerized Postgres instance and then run the following commands:
 ```
-# prerequisites : 
-#    - pip install antlr4-python3-runtime
+CREATE EXTENSION age;
+LOAD 'age';
+SET search_path = ag_catalog, "$user", public;
 ```
+
+
+
