@@ -12,6 +12,7 @@ class Graph():
     def __init__(self, stmt=None) -> None:
         self.statement = stmt
         self.rows = list()
+        self.vertices = dict()
 
     def __iter__(self):
         return self.rows.__iter__()
@@ -19,9 +20,24 @@ class Graph():
     def __len__(self):
         return self.rows.__len__()
 
-    def append(self, row):
-        self.rows.append(row)
+    def __getitem__(self,index):
+        return self.rows[index]
         
+    def size(self):
+        return self.rows.__len__()
+
+    def append(self, agObj):
+        self.rows.append(agObj)
+    
+    def getVertices(self):
+        return self.vertices
+    
+    def getVertex(self, id):
+        if id in self.vertices:
+            return self.vertices[id]
+        else:
+            return None
+
 class AGObj:
     @property
     def gtype(self):
@@ -97,6 +113,15 @@ class Vertex(AGObj):
     def gtype(self):
         return TP_VERTEX
 
+    def __setitem__(self,name, value):
+        self.properties[name]=value
+        
+    def __getitem__(self,name):
+        if name in self.properties:
+            return self.properties[name]
+        else:
+            return None
+
     def __str__(self) -> str:
         return self.toString()
 
@@ -127,6 +152,15 @@ class Edge(AGObj):
     @property
     def gtype(self):
         return TP_EDGE
+
+    def __setitem__(self,name, value):
+        self.properties[name]=value
+        
+    def __getitem__(self,name):
+        if name in self.properties:
+            return self.properties[name]
+        else:
+            return None
 
     def __str__(self) -> str:
         return self.toString()

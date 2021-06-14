@@ -11,11 +11,11 @@ class ResultHandler:
 
 
 def buildGraph(cursor, resultHandler:ResultHandler=None):
-    if resultHandler == None:
-        resultHandler = Antlr4ResultHandler(cursor.query)
-   
     graph = Graph(cursor.query)
 
+    if resultHandler == None:
+        resultHandler = Antlr4ResultHandler(graph.getVertices(), cursor.query)
+   
     for record in cursor:
         parsed = resultHandler.handleRow(record[0])
         graph.append(parsed)
@@ -23,16 +23,19 @@ def buildGraph(cursor, resultHandler:ResultHandler=None):
     return graph
 
 def getRows(cursor):
-    resultHandler = Antlr4ResultHandler(cursor.query)
+    vertexCache = dict()
+    resultHandler = Antlr4ResultHandler(vertexCache, cursor.query)
+    
     for record in cursor:
         yield resultHandler.handleRow(record[0])
+    
+    vertexCache.clear()
 
 class Antlr4ResultHandler(ResultHandler):
-    def __init__(self, query=None):
+    def __init__(self, vertexCache, query=None):
         self.lexer = ageLexer()
         self.parser = ageParser(None)
-        self.visitor = ResultVisitor()
-        self.graph = Graph(query)
+        self.visitor = ResultVisitor(vertexCache)
 
     def handleRow(self, rawString):
         self.lexer.inputStream = InputStream(rawString)
@@ -42,8 +45,6 @@ class Antlr4ResultHandler(ResultHandler):
         parsed = tree.accept(self.visitor)
         return parsed
 
-    def getGraph(self):
-        return self.graph
 
 # print raw result String
 class DummyResultHandler(ResultHandler):
@@ -52,19 +53,32 @@ class DummyResultHandler(ResultHandler):
 
 # default ageout visitor
 class ResultVisitor(ageVisitor):
+    vertexCache = None
+
+    def __init__(self, cache) -> None:
+        super().__init__()
+        self.vertexCache = cache
+
+    
     def visitAgeout(self, ctx:ageParser.AgeoutContext):
         return self.visitChildren(ctx)
 
 
     # Visit a parse tree produced by ageParser#vertex.
     def visitVertex(self, ctx:ageParser.VertexContext):
-        vertex = Vertex()
         proCtx = ctx.getTypedRuleContext(ageParser.PropertiesContext,0)
-
         dict = proCtx.accept(self)
-        vertex.id = dict["id"]
-        vertex.label = dict["label"]
-        vertex.properties = dict["properties"]
+        
+        vid = dict["id"]
+
+        vertex = None
+        if vid in self.vertexCache:
+            vertex = self.vertexCache[vid]
+        else:
+            vertex = Vertex()
+            vertex.id = dict["id"]
+            vertex.label = dict["label"]
+            vertex.properties = dict["properties"]
         
         return vertex
 
