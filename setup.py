@@ -5,7 +5,7 @@ with open("README.md", "r", encoding='utf8') as fh:
     long_description = fh.read()
 
 setup(
-    name             = 'apache-age-py',
+    name             = 'apache-age-python',
     version          = VERSION.VERSION,
     description      = 'Python driver for Apache AGE',
     long_description=long_description,

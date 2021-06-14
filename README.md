@@ -10,7 +10,7 @@ sudo apt-get install python3-dev libpq-dev
 pip install --no-binary :all: psycopg2
 pip install antlr4-python3-runtime
 
-pip install apache_age_py
+pip install apache-age-python
 ```
 
 ### Check AGE loaded on your PostgreSQL
