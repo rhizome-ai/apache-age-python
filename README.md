@@ -13,7 +13,7 @@ pip install antlr4-python3-runtime
 pip install apache_age_py
 ```
 
-### Check AGE loaded in your PostgreSQL
+### Check AGE loaded on your PostgreSQL
 Connect to your containerized Postgres instance and then run the following commands:
 ```
 CREATE EXTENSION age;
@@ -22,4 +22,6 @@ SET search_path = ag_catalog, "$user", public;
 ```
 
 
+### Usage
+Go to [Jupyter Notebook](https://github.com/rhizome-ai/apache-age-python/blob/main/samples/apache-age-note.ipynb) in Samples.
 
