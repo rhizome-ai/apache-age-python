@@ -1,8 +1,6 @@
 
-from .graph import Graph
 from .gen.ageLexer import ageLexer
 from .gen.ageParser import ageParser
-from .gen.ageListener import ageListener
 from .gen.ageVisitor import ageVisitor
 from .models import *
 from antlr4 import *
@@ -73,12 +71,32 @@ class ResultVisitor(ageVisitor):
 
     # Visit a parse tree produced by ageParser#edge.
     def visitEdge(self, ctx:ageParser.EdgeContext):
-        return self.visitChildren(ctx)
+        edge = Edge()
+        proCtx = ctx.getTypedRuleContext(ageParser.PropertiesContext,0)
+
+        dict = proCtx.accept(self)
+        edge.id = dict["id"]
+        edge.label = dict["label"]
+        edge.end_id = dict["end_id"]
+        edge.start_id = dict["start_id"]
+        edge.properties = dict["properties"]
+        
+        return edge
 
 
     # Visit a parse tree produced by ageParser#path.
     def visitPath(self, ctx:ageParser.PathContext):
-        return self.visitChildren(ctx)
+        path = Path()
+
+        vctx1 = ctx.getTypedRuleContext(ageParser.VertexContext, 0)
+        ectx = ctx.getTypedRuleContext(ageParser.EdgeContext, 0)
+        vctx2 = ctx.getTypedRuleContext(ageParser.VertexContext, 1)
+
+        path.start = vctx1.accept(self)
+        path.rel = ectx.accept(self)
+        path.end = vctx2.accept(self)
+        
+        return path
 
 
     # Visit a parse tree produced by ageParser#value.

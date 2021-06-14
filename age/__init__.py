@@ -1,5 +1,6 @@
 from . import age
 from .age import *
+from .models import *
 from .builder import ResultHandler, DummyResultHandler, buildGraph, getRows
 from . import VERSION 
 
@@ -14,3 +15,5 @@ def connect(dsn=None, graph=None, connection_factory=None, cursor_factory=None, 
 
 # Dummy ResultHandler
 rawPrinter = DummyResultHandler()
+
+__name__="age"

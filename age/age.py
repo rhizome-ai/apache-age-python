@@ -55,6 +55,11 @@ class Age:
         else:
             self.cursor.execute("SELECT create_graph(%s);", (graphName,))
 
+    def deleteGraph(self, graphName):
+        if self.graphExists(graphName) :
+            self.cursor.execute("SELECT drop_graph(%s, true);", (graphName,))
+            
+
     def newCursor(self):
         self.cursor.close()
         self.cursor = self.conn.cursor()
@@ -62,7 +67,7 @@ class Age:
 
     def _checkReady(self):
         if self.graphName == None:
-            raise execptions._EXCEPTION_GraphNotSet
+            raise _EXCEPTION_GraphNotSet
         if self.conn == None:
             raise _EXCEPTION_NoConnection
         if self.cursor == None:
@@ -85,6 +90,7 @@ class Age:
             self.cursor.execute(stmt, *args)
             return self
         except Exception as cause:
+            self.conn.rollback()
             raise SqlExcutionError(stmt,cause)
         
     
