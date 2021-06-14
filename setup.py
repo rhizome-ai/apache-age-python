@@ -13,7 +13,7 @@ setup(
     author           = 'Ikchan Kwon',
     author_email     = 'rhizome.ai@gmail.com',
     url              = 'https://github.com/rhizome-ai/apache-age-python',
-    download_url     = 'https://github.com/rhizome-ai/apache-age-python/releases/tag/v'+VERSION.VERSION ,
+    download_url     = 'https://github.com/rhizome-ai/apache-age-python/releases/' ,
     license          = 'Apache2.0',
     install_requires = [ 'psycopg2', 'antlr4-python3-runtime' ],
     packages         = find_packages(exclude = ['bisect', 'notebooks', 'samples']),

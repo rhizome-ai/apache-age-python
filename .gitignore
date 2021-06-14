@@ -3,5 +3,5 @@
 apache_age_py.egg-info/
 apache_age_python.egg-info/
 dist/
-build/lib/
+build/
 antlr/.antlr
