@@ -7,8 +7,6 @@ This driver runs on [psycopg2](https://www.psycopg.org/) and [antlr4-python3](ht
 ```
 sudo apt-get update
 sudo apt-get install python3-dev libpq-dev
-pip install --no-binary :all: psycopg2
-pip install antlr4-python3-runtime
 
 pip install apache-age-python
 ```
