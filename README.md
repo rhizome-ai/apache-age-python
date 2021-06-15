@@ -1,10 +1,10 @@
 # apache-age-python
-Python driver for Apache AGE, graph extention for PostgreSQL.
+Python driver support for Apache AGE, graph extention for PostgreSQL.
 
 
 ### Install
 * over Python 3.9
-* This driver runs on [psycopg2](https://www.psycopg.org/) and [antlr4-python3](https://pypi.org/project/antlr4-python3-runtime/)
+* This module runs on [psycopg2](https://www.psycopg.org/) and [antlr4-python3](https://pypi.org/project/antlr4-python3-runtime/)
 ```
 sudo apt-get update
 sudo apt-get install python3-dev libpq-dev

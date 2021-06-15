@@ -7,7 +7,7 @@ with open("README.md", "r", encoding='utf8') as fh:
 setup(
     name             = 'apache-age-python',
     version          = VERSION.VERSION,
-    description      = 'Python driver for Apache AGE',
+    description      = 'Python driver support for Apache AGE',
     long_description=long_description,
     long_description_content_type="text/markdown",
     author           = 'Ikchan Kwon',
