@@ -107,8 +107,17 @@ class Age:
         return self.execCypher(cypherStmt, *args)
     
     def graph(self, resultHandler:ResultHandler=None):
-        return buildGraph(self.cursor, resultHandler)
+        return buildGraph(self.cursor, resultHandler=resultHandler)
 
     def rows(self):
         return getRows(self.cursor)
-    
+
+
+def execCypher(cursor, graphName, cypherStmt, *args):
+    stmt = "SELECT * from cypher('"+ graphName +"', $$ "+cypherStmt+" $$) as (v agtype);"
+    return cursor.execute(stmt, *args)
+
+def queryCypher(cursor, graphName, cypherStmt, *args):
+    stmt = "SELECT * from cypher('"+ graphName +"', $$ "+cypherStmt+" $$) as (v agtype);"
+    return cursor.execute(stmt, *args)
+
