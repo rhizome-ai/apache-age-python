@@ -31,6 +31,10 @@ def getRows(cursor):
     
     vertexCache.clear()
 
+def getSingle(cursor):
+    resultHandler = Antlr4ResultHandler(dict(), cursor.query)
+    return resultHandler.handleRow(cursor.fetchone()[0])
+
 class Antlr4ResultHandler(ResultHandler):
     def __init__(self, vertexCache, query=None):
         self.lexer = ageLexer()
