@@ -33,6 +33,10 @@ SET search_path = ag_catalog, "$user", public;
 ```
 
 
+### Test
+```
+python -m unittest -v test/test_age_py.py
+```
 ### Usage
 Go to [Jupyter Notebook](https://github.com/rhizome-ai/apache-age-python/blob/main/samples/apache-age-note.ipynb) in Samples.
 
