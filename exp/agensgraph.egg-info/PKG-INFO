@@ -1,0 +1,12 @@
+Metadata-Version: 1.2
+Name: agensgraph
+Version: 1.0.0
+Summary: Psycopg2 type extension module for AgensGraph
+Home-page: https://github.com/bitnine-oss/agensgraph-python
+Author: Junseok Yang
+Author-email: jsyang@bitnine.net
+Maintainer: Gitae Yun
+Maintainer-email: gtyun@bitnine.net
+License: Apache License Version 2.0
+Description: UNKNOWN
+Platform: UNKNOWN
