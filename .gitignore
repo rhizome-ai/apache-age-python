@@ -6,4 +6,4 @@ apache_age_python.egg-info/
 dist/
 build/
 antlr/.antlr
-exp/
+/exp2/
