@@ -40,17 +40,17 @@ class TestAgeBasic(unittest.TestCase):
         for row in cursor:
             print("CREATED: ", row[0]) 
             
-        cursor = ag.execCypher("CREATE (n:Person {name: %s, title: 'Developer'}) RETURN n", False, ('Andy',))
+        cursor = ag.execCypherWithReturn("CREATE (n:Person {name: %s, title: 'Developer'}) RETURN n", None, ('Andy',))
         for row in cursor:
             print("CREATED: ", row[0])
             
 
-        cursor = ag.execCypher("MATCH (n:Person {name: %s}) SET n.title=%s RETURN n", False, ('Smith','Manager',))
+        cursor = ag.execCypherWithReturn("MATCH (n:Person {name: %s}) SET n.title=%s RETURN count(n)", ["a integer"], ('Smith','Manager',))
         for row in cursor:
             print("SET: ", row[0])
 
 
-        cursor = ag.execCypher("MATCH (n:Person {name: %s}) REMOVE n.title RETURN n", False, ('Smith',))
+        cursor = ag.execCypherWithReturn("MATCH (n:Person {name: %s}) REMOVE n.title RETURN id(n)", ["a bigint"], ('Smith',))
         for row in cursor:
             print("REMOVE Prop: ", row[0])
 
@@ -68,7 +68,7 @@ class TestAgeBasic(unittest.TestCase):
             print("-->", vertex)
 
         # Query Vertices with with multi column
-        print("-- Query Vertices with with multi column. --------------------")
+        print("-- Query Vertices with with multi columns. --------------------")
         cursor = ag.queryCypher("MATCH (n:Person) RETURN label(n), n.name",['label VARCHAR', 'name'])
         for row in cursor:
             label = row[0]
