@@ -3,6 +3,7 @@ from .gen.ageLexer import ageLexer
 from .gen.ageParser import ageParser
 from .gen.ageVisitor import ageVisitor
 from .models import *
+from .exceptions import *
 from antlr4 import *
 from antlr4.tree.Tree import *
 from decimal import Decimal
@@ -12,35 +13,45 @@ class ResultHandler:
         pass
 
 def newResultHandler(query=""):
-    vertexCache = dict()
-    resultHandler = Antlr4ResultHandler(vertexCache, query)
+    resultHandler = Antlr4ResultHandler(None, query)
     return resultHandler
 
-def buildGraph(cursor, resultHandler:ResultHandler=None):
-    graph = Graph(cursor.query)
+# def buildGraph(cursor, resultHandler:ResultHandler=None):
+#     graph = Graph(cursor.query)
 
-    if resultHandler == None:
-        resultHandler = Antlr4ResultHandler(graph.getVertices(), cursor.query)
+#     if resultHandler == None:
+#         resultHandler = Antlr4ResultHandler(graph.getVertices(), cursor.query)
    
-    for record in cursor:
-        parsed = resultHandler.handleRow(record[0])
-        graph.append(parsed)
+#     for record in cursor:
+#         parsed = resultHandler.handleRow(record[0])
+#         graph.append(parsed)
 
-    return graph
+#     return graph
 
-def getRows(cursor):
-    vertexCache = dict()
-    resultHandler = Antlr4ResultHandler(vertexCache, cursor.query)
+# def getRows(cursor):
+#     vertexCache = dict()
+#     resultHandler = Antlr4ResultHandler(vertexCache, cursor.query)
     
-    for record in cursor:
-        yield resultHandler.handleRow(record[0])
+#     for record in cursor:
+#         yield resultHandler.handleRow(record[0])
     
-    vertexCache.clear()
+#     vertexCache.clear()
 
-def getSingle(cursor):
-    resultHandler = Antlr4ResultHandler(dict(), cursor.query)
-    return resultHandler.handleRow(cursor.fetchone()[0])
 
+# def getSingle(cursor):
+#     resultHandler = Antlr4ResultHandler(None, cursor.query)
+#     return resultHandler.handleRow(cursor.fetchone()[0])
+
+# Parsing function for Psycopg2 type
+def parseAgeValue(value, cursor):
+    if value is None:
+        return None
+
+    resultHandler = Antlr4ResultHandler(None)
+    try:
+        return resultHandler.handleRow(value)
+    except Exception as ex:
+        raise AGTypeError(value)
 class Antlr4ResultHandler(ResultHandler):
     def __init__(self, vertexCache, query=None):
         self.lexer = ageLexer()
@@ -82,7 +93,7 @@ class ResultVisitor(ageVisitor):
         vid = dict["id"]
 
         vertex = None
-        if vid in self.vertexCache:
+        if self.vertexCache != None and vid in self.vertexCache :
             vertex = self.vertexCache[vid]
         else:
             vertex = Vertex()
@@ -90,6 +101,9 @@ class ResultVisitor(ageVisitor):
             vertex.label = dict["label"]
             vertex.properties = dict["properties"]
         
+        if self.vertexCache != None:
+            self.vertexCache[vid] = vertex
+
         return vertex
 
 
@@ -165,11 +179,10 @@ class ResultVisitor(ageVisitor):
 def getScalar(agType, text):
     if agType == ageParser.STRING:
         return text.strip('"')
-    elif agType == ageParser.NUMBER:
-        if '.' in text:
-            return float(text)
-        else:
-            return int(text)
+    elif agType == ageParser.INTEGER:
+        return int(text)
+    elif agType == ageParser.FLOAT:
+        return float(text)
     elif agType == ageParser.FLOAT_EXPR:
         if text == 'NaN':
             return float('nan')

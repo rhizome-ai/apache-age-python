@@ -1,13 +1,13 @@
 import unittest
 import age 
 
-DSN = "host=172.17.0.3 port=5432 dbname=postgres user=postgres password=agens"
-TEST_HOST = "172.17.0.3"
+DSN = "host=172.17.0.2 port=5432 dbname=postgres user=postgres password=agens"
+TEST_HOST = "172.17.0.2"
 TEST_PORT = 5432
 TEST_DB = "postgres"
 TEST_USER = "postgres"
 TEST_PASSWORD = "agens"
-TEST_GRAPH_NAME = "test_graph5"
+TEST_GRAPH_NAME = "test_graph"
 
 class TestAgeBasic(unittest.TestCase):
     ag = None
@@ -19,52 +19,61 @@ class TestAgeBasic(unittest.TestCase):
     def tearDown(self):
         # Clear test data
         print("Deleting Test Graph.....")
-        self.ag.deleteGraph(self.ag.graphName)
+        age.deleteGraph(self.ag.connection, self.ag.graphName)
         self.ag.close()
 
-    
-    def test_all(self):
+    def testAll(self):
+        self.createVertices()
+        self.queryVertices()
+
+    def createVertices(self):
         ag = self.ag
         # Create Vertices
-        ag.execCypher("CREATE (n:Person {name: 'Joe'})")
-        ag.execCypher("CREATE (n:Person {name: 'Smith', bigInt:123456789012345678901234567890::numeric})")
-        ag.execCypher("CREATE (n:Person {name: %s, bigFloat:123456789012345678901234567890::numeric})", ('Jack',))
-        ag.execCypher("CREATE (n:Person {name: 'Andy', title: 'Developer'})")
-        ag.execCypher("CREATE (n:Person {name: %s, title: %s})", ('Tom','Developer',))
-        ag.commit()
-
-        # Query Vertices with result parsed full graph.
-        ag.queryCypher("MATCH (n:Person) RETURN n")
-        graph = ag.graph()
-        self.assertEqual(5, len(graph), "Create and retrieve vertices.")
-
-        for vertex in graph:
-            self.assertEqual( age.models.Vertex, type(vertex), "Retrieve and unmarshal Vertex.")
-
-        # Query Vertices with parsed row cursor.
-        ag.queryCypher("MATCH (n:Person) RETURN n")
-        for vertex in ag.rows():
-            self.assertIsNotNone(vertex.id)
-            self.assertIsNotNone(vertex.properties["name"])
-            self.assertIsNotNone(vertex.toJson())
-
-        # Create Edges
-        ag.execCypher("MATCH (a:Person), (b:Person) WHERE a.name = 'Joe' AND b.name = 'Smith' CREATE (a)-[r:workWith {weight: 3}]->(b)")
-        ag.execCypher("MATCH (a:Person), (b:Person) WHERE  a.name = 'Andy' AND b.name = 'Tom' CREATE (a)-[r:workWith {weight: 1}]->(b)")
-        ag.execCypher("MATCH (a:Person {name: 'Jack'}), (b:Person {name: 'Andy'}) CREATE (a)-[r:workWith {weight: 5}]->(b)")
-        ag.execCypher("MATCH (a:Person {name: 'Joe'}), (b:Person {name: 'Jack'}) CREATE (a)-[r:workWith {weight: 5}]->(b)")
-        ag.commit()
-
-        ag.queryCypher("MATCH p=()-[:workWith]-() RETURN p")
-        graph = ag.graph()
-        self.assertEqual(8, len(graph), "Create and retrieve paths.")
-        for path in graph:
-            self.assertEqual(3, len(path), "Path length must be 3")
-            self.assertEqual( age.models.Path, type(path), "Retrieve and unmarshal Path.")
-            print(path[0].label, path[0]["name"] , "-",  path[1].label, path[1]["weight"] , "-", path[2].label, path[2]["name"])
-
-
+        # Commit automatically
+        ag.execCypher("CREATE (n:Person {name: 'Joe'})", True)
+        cursor = ag.execCypher("CREATE (n:Person {name: 'Smith'})", True)
+        for row in cursor:
+            print("NO RESULT: ", row[0])
             
+        # defer Commit 
+        cursor = ag.execCypher("CREATE (n:Person {name: %s}) RETURN n", False, ('Jack',))
+        for row in cursor:
+            print("CREATED: ", row[0]) 
+            
+        cursor = ag.execCypher("CREATE (n:Person {name: %s, title: 'Developer'}) RETURN n", False, ('Andy',))
+        for row in cursor:
+            print("CREATED: ", row[0])
+            
+
+        cursor = ag.execCypher("MATCH (n:Person {name: %s}) SET n.title=%s RETURN n", False, ('Smith','Manager',))
+        for row in cursor:
+            print("SET: ", row[0])
+
+
+        cursor = ag.execCypher("MATCH (n:Person {name: %s}) REMOVE n.title RETURN n", False, ('Smith',))
+        for row in cursor:
+            print("REMOVE Prop: ", row[0])
+
+        # You must commit explicitly
+        ag.commit()
+
+    def queryVertices(self):
+        ag = self.ag
+        # Query Vertices with parsed row cursor.
+        print("-- Query Vertices  --------------------")
+        cursor = ag.queryCypher("MATCH (n:Person) RETURN n",[])
+        for row in cursor:
+            vertex = row[0]
+            print(vertex.id, vertex.label, vertex["name"])
+            print("-->", vertex)
+
+        # Query Vertices with with multi column
+        print("-- Query Vertices with with multi column. --------------------")
+        cursor = ag.queryCypher("MATCH (n:Person) RETURN label(n), n.name",['label VARCHAR', 'name'])
+        for row in cursor:
+            label = row[0]
+            name = row[1]
+            print(label, name) 
 
 if __name__ == '__main__':
     unittest.main()

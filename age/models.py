@@ -271,7 +271,7 @@ def _nodeToJson(node, buf, extraFormatter=None):
             buf.write(k)
             buf.write("\": \"")
             buf.write(str(v))
-            buf.write("\",")
+            buf.write("\", ")
         buf.write("}")
     buf.write("}")
     
