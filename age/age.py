@@ -54,10 +54,12 @@ class Age:
             raise GraphAlreadyExists(graphName)
         else:
             self.cursor.execute("SELECT create_graph(%s);", (graphName,))
+            self.conn.commit()
 
     def deleteGraph(self, graphName):
         if self.graphExists(graphName) :
             self.cursor.execute("SELECT drop_graph(%s, true);", (graphName,))
+            self.conn.commit()
             
 
     def newCursor(self):

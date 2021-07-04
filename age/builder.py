@@ -1,14 +1,20 @@
-
+from . import gen
 from .gen.ageLexer import ageLexer
 from .gen.ageParser import ageParser
 from .gen.ageVisitor import ageVisitor
 from .models import *
 from antlr4 import *
+from antlr4.tree.Tree import *
+from decimal import Decimal
 
 class ResultHandler:
     def handleRow(rawString):
         pass
 
+def newResultHandler(query=""):
+    vertexCache = dict()
+    resultHandler = Antlr4ResultHandler(vertexCache, query)
+    return resultHandler
 
 def buildGraph(cursor, resultHandler:ResultHandler=None):
     graph = Graph(cursor.query)
@@ -104,7 +110,6 @@ class ResultVisitor(ageVisitor):
 
     # Visit a parse tree produced by ageParser#path.
     def visitPath(self, ctx:ageParser.PathContext):
-        path = Path()
 
         children = []
         
@@ -114,12 +119,9 @@ class ResultVisitor(ageVisitor):
             if isinstance(child, ageParser.EdgeContext):
                 children.append(child.accept(self))
 
-        path.start = children[0]
-        path.rel = children[1]
-        path.end = children[2]
+        path = Path(children)
         
         return path
-
 
     # Visit a parse tree produced by ageParser#value.
     def visitValue(self, ctx:ageParser.ValueContext):
@@ -127,11 +129,10 @@ class ResultVisitor(ageVisitor):
         if isinstance(c, ageParser.PropertiesContext) or isinstance(c,ageParser.ArrContext):
             val = c.accept(self)
             return val
+        elif isinstance(c, TerminalNodeImpl):
+            return getScalar(c.symbol.type, c.getText())
         else:
-            val = c.getText().strip('"')
-            return val
-
-
+            return None
 
     # Visit a parse tree produced by ageParser#properties.
     def visitProperties(self, ctx:ageParser.PropertiesContext):
@@ -160,3 +161,29 @@ class ResultVisitor(ageVisitor):
                 li.append(val)
         return li
 
+
+def getScalar(agType, text):
+    if agType == ageParser.STRING:
+        return text.strip('"')
+    elif agType == ageParser.NUMBER:
+        if '.' in text:
+            return float(text)
+        else:
+            return int(text)
+    elif agType == ageParser.FLOAT_EXPR:
+        if text == 'NaN':
+            return float('nan')
+        elif text == '-Infinity':
+            return float('-inf')
+        elif text == 'Infinity':
+            return float('inf')
+        else:
+            return Exception("Unknown float expression:"+text)
+    elif agType == ageParser.BOOL:
+        return text == "true" or text=="True"
+    elif agType == ageParser.NUMERIC:
+        return Decimal(text[:len(text)-9])
+    elif agType == ageParser.NULL:
+        return None
+    else :
+        raise Exception("Unknown type:"+str(agType))

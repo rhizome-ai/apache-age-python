@@ -21,20 +21,22 @@ path
    : '[' vertex (',' edge ',' vertex)* ']' KW_PATH
    ;
 
-//Keywords
+//TAGS
 KW_VERTEX : '::vertex';
 KW_EDGE : '::edge';
 KW_PATH : '::path';
+KW_NUMERIC : '::numeric';
 
 // Common Values Rule
 value
    : STRING
    | NUMBER
+   | FLOAT_EXPR
+   | NUMERIC
+   | BOOL
+   | NULL
    | properties
    | arr
-   | 'true'
-   | 'false'
-   | 'null'
    ;
 
 properties
@@ -55,6 +57,14 @@ STRING
    : '"' (ESC | SAFECODEPOINT)* '"'
    ;
 
+BOOL
+   : 'true'|'false'
+   ;
+
+NULL
+   : 'null' 
+   ;
+
 
 fragment ESC
    : '\\' (["\\/bfnrt] | UNICODE)
@@ -72,6 +82,14 @@ fragment SAFECODEPOINT
 
 NUMBER
    : '-'? INT ('.' [0-9] +)? EXP?
+   ;
+
+FLOAT_EXPR
+   : 'NaN' | '-Infinity' | 'Infinity'
+   ;
+
+NUMERIC
+   : '-'? INT ('.' [0-9] +)? EXP? KW_NUMERIC
    ;
 
 

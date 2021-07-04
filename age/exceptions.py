@@ -38,3 +38,10 @@ class SqlExcutionError(Exception):
     
     def __repr__(self) :
         return 'SqlExcution [' + self.msg + ']'  
+
+class AGTypeError(Exception):
+    def __init__(self, msg):
+        self.msg = msg
+        super().__init__(msg)
+
+
