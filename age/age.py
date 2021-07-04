@@ -98,12 +98,12 @@ def execCypher(conn:ext.connection, graphName:str, cypherStmt:str, commit:bool, 
     stmt = buildCypher(graphName, cypherStmt)
     return execSql(conn, stmt, commit, *args)
 
-def execCypherWithReturn(conn:ext.connection, graphName:str, cypherStmt:str, columns:list, *args) -> ext.cursor :
+def execCypherWithReturn(conn:ext.connection, graphName:str, cypherStmt:str, columns:list , *args) -> ext.cursor :
     stmt = buildCypher(graphName, cypherStmt, columns)
     return execSql(conn, stmt, False, *args)
 
-def queryCypher(conn:ext.connection, graphName:str, cypherStmt:str, columns:list, *args) -> ext.cursor :
-    return execCypherWithReturn(conn, cypherStmt, columns, *args)
+def queryCypher(conn:ext.connection, graphName:str, cypherStmt:str, columns:list , *args) -> ext.cursor :
+    return execCypherWithReturn(conn, graphName, cypherStmt, columns, *args)
 
 
 class Age:
@@ -140,10 +140,10 @@ class Age:
     def execCypher(self, cypherStmt:str, commit:bool, *args) -> ext.cursor :
         return execCypher(self.connection, self.graphName, cypherStmt, commit, *args)
 
-    def execCypherWithReturn(self, cypherStmt:str, columns:list, *args) -> ext.cursor :
+    def execCypherWithReturn(self, cypherStmt:str, columns:list , *args) -> ext.cursor :
         return execCypherWithReturn(self.connection, self.graphName, cypherStmt, columns, *args)
 
-    def queryCypher(self, cypherStmt:str, columns:list, *args) -> ext.cursor :
+    def queryCypher(self, cypherStmt:str, columns:list , *args) -> ext.cursor :
         return queryCypher(self.connection, self.graphName, cypherStmt, columns, *args)
 
 

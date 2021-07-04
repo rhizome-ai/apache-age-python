@@ -1,3 +1,4 @@
+from age.models import Vertex
 import unittest
 import age 
 
@@ -22,10 +23,46 @@ class TestAgeBasic(unittest.TestCase):
         age.deleteGraph(self.ag.connection, self.ag.graphName)
         self.ag.close()
 
-    def testAll(self):
-        self.createVertices()
-        self.queryVertices()
+    def testExec(self):
+        ag = self.ag
+        cursor = ag.execCypher("CREATE (n:Person {name: %s}) RETURN n", False, ('Jack',))
+        row = cursor.fetchone()
+        
+        self.assertEquals(int, type(row[0].id))
+        ag.commit()
 
+        cursor = ag.execCypherWithReturn("CREATE (n:Person {name: %s, title: 'Developer'}) RETURN n", None, ('Andy',))
+        for row in cursor:
+            print(Vertex, type(row[0]))
+            
+        
+    def testQuery(self):
+        ag = self.ag
+        ag.execCypher("CREATE (n:Person {name: %s}) RETURN n", True, ('Jack',))
+        ag.execCypher("CREATE (n:Person {name: %s}) RETURN n", True, ('Andy',))
+        ag.execCypher("CREATE (n:Person {name: %s}) RETURN n", True, ('Smith',))
+        ag.execCypher("MATCH (a:Person), (b:Person) WHERE a.name = 'Andy' AND b.name = 'Jack' CREATE (a)-[r:workWith {weight: 3}]->(b)",True)
+        ag.execCypher("""MATCH (a:Person), (b:Person) 
+                    WHERE  a.name = %s AND b.name = %s 
+                    CREATE p=((a)-[r:workWith]->(b)) """, True, 
+                    ('Jack', 'Smith',))
+        
+        cursor = ag.queryCypher("MATCH p=()-[:workWith]-() RETURN p", None)
+        for row in cursor:
+            path = row[0]
+            print("START:", path[0])
+            print("EDGE:", path[1])
+            print("END:", path[2])  
+
+        cursor = ag.queryCypher("MATCH p=(a)-[b]-(c) WHERE b.weight>2 RETURN a,label(b), b.weight, c", ["a","bl","bw", "c"], (2,))
+        for row in cursor:
+            start = row[0]
+            edgel = row[1]
+            edgew = row[2]
+            end = row[3]
+            print(start["name"] , edgel, edgew, end["name"]) 
+            
+        
     def createVertices(self):
         ag = self.ag
         # Create Vertices
