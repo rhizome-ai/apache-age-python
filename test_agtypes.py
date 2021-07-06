@@ -10,8 +10,8 @@ class TestAgtype(unittest.TestCase):
         super().__init__(methodName=methodName)
         self.resultHandler = age.newResultHandler()
     
-    def handleRow(self, exp):
-        return self.resultHandler.handleRow(exp) 
+    def parse(self, exp):
+        return self.resultHandler.parse(exp) 
 
     def test_scalar(self):
         mapStr = '{"name": "Smith", "num":123, "yn":true, "bigInt":123456789123456789123456789123456789::numeric}' 
@@ -28,19 +28,19 @@ class TestAgtype(unittest.TestCase):
         infpStr = "Infinity"
         infnStr = "-Infinity"
 
-        mapVal = self.handleRow(mapStr)
-        arrVal = self.handleRow(arrStr)
-        str = self.handleRow(strStr)
-        intVal = self.handleRow(intStr)
-        floatVal = self.handleRow(floatStr)
-        floatVal2 = self.handleRow(floatStr2)
-        bigFloat = self.handleRow(numericStr1)
-        bigInt = self.handleRow(numericStr2)
-        boolVal = self.handleRow(boolStr)
-        nullVal = self.handleRow(nullStr)
-        nanVal = self.handleRow(nanStr)
-        infpVal = self.handleRow(infpStr)
-        infnVal = self.handleRow(infnStr)
+        mapVal = self.parse(mapStr)
+        arrVal = self.parse(arrStr)
+        str = self.parse(strStr)
+        intVal = self.parse(intStr)
+        floatVal = self.parse(floatStr)
+        floatVal2 = self.parse(floatStr2)
+        bigFloat = self.parse(numericStr1)
+        bigInt = self.parse(numericStr2)
+        boolVal = self.parse(boolStr)
+        nullVal = self.parse(nullStr)
+        nanVal = self.parse(nanStr)
+        infpVal = self.parse(infpStr)
+        infnVal = self.parse(infnStr)
 
         print("map", type(mapVal), mapVal)
         print("arr", type(arrVal), arrVal)
@@ -76,7 +76,7 @@ class TestAgtype(unittest.TestCase):
             "bigFloat":123456789123456789123456789123456789.12345::numeric, 
             "yn":true, "nullVal": null}}::vertex'''
 
-        vertex = self.handleRow(vertexExp)
+        vertex = self.parse(vertexExp)
         self.assertEqual(vertex.id,  2251799813685425)
         self.assertEqual(vertex.label,  "Person")
         self.assertEqual(vertex["name"],  "Smith")
@@ -93,7 +93,7 @@ class TestAgtype(unittest.TestCase):
                 "properties": {"weight": 3, "bigFloat":123456789123456789123456789.12345::numeric}}::edge, 
             {"id": 2251799813685424, "label": "Person", "properties": {"name": "Joe"}}::vertex]::path'''
 
-        path = self.handleRow(pathExp)
+        path = self.parse(pathExp)
         vertexStart = path[0]
         edge = path[1]
         vertexEnd = path[2]

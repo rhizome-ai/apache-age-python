@@ -9,7 +9,7 @@ from antlr4.tree.Tree import *
 from decimal import Decimal
 
 class ResultHandler:
-    def handleRow(rawString):
+    def parse(ageData):
         pass
 
 def newResultHandler(query=""):
@@ -23,7 +23,7 @@ def newResultHandler(query=""):
 #         resultHandler = Antlr4ResultHandler(graph.getVertices(), cursor.query)
    
 #     for record in cursor:
-#         parsed = resultHandler.handleRow(record[0])
+#         parsed = resultHandler.parse(record[0])
 #         graph.append(parsed)
 
 #     return graph
@@ -33,33 +33,33 @@ def newResultHandler(query=""):
 #     resultHandler = Antlr4ResultHandler(vertexCache, cursor.query)
     
 #     for record in cursor:
-#         yield resultHandler.handleRow(record[0])
+#         yield resultHandler.parse(record[0])
     
 #     vertexCache.clear()
 
 
 # def getSingle(cursor):
 #     resultHandler = Antlr4ResultHandler(None, cursor.query)
-#     return resultHandler.handleRow(cursor.fetchone()[0])
+#     return resultHandler.parse(cursor.fetchone()[0])
 
-# Parsing function for Psycopg2 type
-def parseAgeValue(value, cursor):
+def parseAgeValue(value, cursor=None):
     if value is None:
         return None
 
     resultHandler = Antlr4ResultHandler(None)
     try:
-        return resultHandler.handleRow(value)
+        return resultHandler.parse(value)
     except Exception as ex:
         raise AGTypeError(value)
+
 class Antlr4ResultHandler(ResultHandler):
     def __init__(self, vertexCache, query=None):
         self.lexer = ageLexer()
         self.parser = ageParser(None)
         self.visitor = ResultVisitor(vertexCache)
 
-    def handleRow(self, rawString):
-        self.lexer.inputStream = InputStream(rawString)
+    def parse(self, ageData):
+        self.lexer.inputStream = InputStream(ageData)
         self.parser.setTokenStream(CommonTokenStream(self.lexer))
         self.parser.reset()
         tree = self.parser.ageout()
@@ -69,8 +69,8 @@ class Antlr4ResultHandler(ResultHandler):
 
 # print raw result String
 class DummyResultHandler(ResultHandler):
-    def handleRow(self, rawString):
-        print(rawString)
+    def parse(self, ageData):
+        print(ageData)
 
 # default ageout visitor
 class ResultVisitor(ageVisitor):

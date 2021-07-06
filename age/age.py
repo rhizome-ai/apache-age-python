@@ -44,14 +44,16 @@ def deleteGraph(conn:ext.connection, graphName:str):
         conn.commit()
     
 
-def buildCypher(graphName:str, cypherStmt:str, columns:list=None) ->str:
+def buildCypher(graphName:str, cypherStmt:str, columns:list) ->str:
     if graphName == None:
         raise _EXCEPTION_GraphNotSet
     
     columnExp=[]
     if columns != None and len(columns) > 0:
         for col in columns:
-            if WHITESPACE.search(col) != None:
+            if col.strip() == '':
+                continue
+            elif WHITESPACE.search(col) != None:
                 columnExp.append(col)
             else:
                 columnExp.append(col + " agtype")
@@ -68,13 +70,13 @@ def buildCypher(graphName:str, cypherStmt:str, columns:list=None) ->str:
     stmtArr.append(");")
     return "".join(stmtArr)
 
-def execSql(conn:ext.connection, stmt:str, commit:bool, *args) -> ext.cursor :
+def execSql(conn:ext.connection, stmt:str, commit:bool=False, params:tuple=None) -> ext.cursor :
     if conn == None or conn.closed:
         raise _EXCEPTION_NoConnection
     
     cursor = conn.cursor()
     try:
-        cursor.execute(stmt, *args)
+        cursor.execute(stmt, params)
         if commit:
             conn.commit()
         
@@ -87,23 +89,36 @@ def execSql(conn:ext.connection, stmt:str, commit:bool, *args) -> ext.cursor :
         raise SqlExcutionError("Excution ERR[" + str(cause) +"](" + stmt +")", cause)
 
 
-def querySql(conn:ext.connection, stmt:str, *args) -> ext.cursor :
-    return execSql(conn, stmt, False, *args)
+def querySql(conn:ext.connection, stmt:str, params:tuple=None) -> ext.cursor :
+    return execSql(conn, stmt, False, params)
 
 # Execute cypher statement and return cursor.
 # If cypher statement changes data (create, set, remove), 
-# You must commit session(ag.commit()) or pass commit argument True 
+# You must commit session(ag.commit()) 
 # (Otherwise the execution cannot make any effect.)
-def execCypher(conn:ext.connection, graphName:str, cypherStmt:str, commit:bool, *args) -> ext.cursor :
-    stmt = buildCypher(graphName, cypherStmt)
-    return execSql(conn, stmt, commit, *args)
+def execCypher(conn:ext.connection, graphName:str, cypherStmt:str, cols:list=None, params:tuple=None) -> ext.cursor :
+    if conn == None or conn.closed:
+        raise _EXCEPTION_NoConnection
 
-def execCypherWithReturn(conn:ext.connection, graphName:str, cypherStmt:str, columns:list , *args) -> ext.cursor :
-    stmt = buildCypher(graphName, cypherStmt, columns)
-    return execSql(conn, stmt, False, *args)
+    stmt = buildCypher(graphName, cypherStmt, cols)
+    
+    cursor = conn.cursor()
+    try:
+        cursor.execute(stmt, params)
+        return cursor
+    except SyntaxError as cause:
+        conn.rollback()
+        raise cause
+    except Exception as cause:
+        conn.rollback()
+        raise SqlExcutionError("Excution ERR[" + str(cause) +"](" + stmt +")", cause)
 
-def queryCypher(conn:ext.connection, graphName:str, cypherStmt:str, columns:list , *args) -> ext.cursor :
-    return execCypherWithReturn(conn, graphName, cypherStmt, columns, *args)
+# def execCypherWithReturn(conn:ext.connection, graphName:str, cypherStmt:str, columns:list=None , params:tuple=None) -> ext.cursor :
+#     stmt = buildCypher(graphName, cypherStmt, columns)
+#     return execSql(conn, stmt, False, params)
+
+# def queryCypher(conn:ext.connection, graphName:str, cypherStmt:str, columns:list=None , params:tuple=None) -> ext.cursor :
+#     return execCypherWithReturn(conn, graphName, cypherStmt, columns, params)
 
 
 class Age:
@@ -132,19 +147,22 @@ class Age:
         
     def rollback(self):
         self.connection.rollback()
-        
-    def execSql(self, stmt:str, commit:bool=False, *args) -> ext.cursor :
-        return execSql(self.connection, stmt, commit, *args)
+    
+    def execCypher(self, cypherStmt:str, cols:list=None, params:tuple=None) -> ext.cursor :
+        return execCypher(self.connection, self.graphName, cypherStmt, cols=cols, params=params)
+
+    # def execSql(self, stmt:str, commit:bool=False, params:tuple=None) -> ext.cursor :
+    #     return execSql(self.connection, stmt, commit, params)
         
     
-    def execCypher(self, cypherStmt:str, commit:bool, *args) -> ext.cursor :
-        return execCypher(self.connection, self.graphName, cypherStmt, commit, *args)
+    # def execCypher(self, cypherStmt:str, commit:bool=False, params:tuple=None) -> ext.cursor :
+    #     return execCypher(self.connection, self.graphName, cypherStmt, commit, params)
 
-    def execCypherWithReturn(self, cypherStmt:str, columns:list , *args) -> ext.cursor :
-        return execCypherWithReturn(self.connection, self.graphName, cypherStmt, columns, *args)
+    # def execCypherWithReturn(self, cypherStmt:str, columns:list=None , params:tuple=None) -> ext.cursor :
+    #     return execCypherWithReturn(self.connection, self.graphName, cypherStmt, columns, params)
 
-    def queryCypher(self, cypherStmt:str, columns:list , *args) -> ext.cursor :
-        return queryCypher(self.connection, self.graphName, cypherStmt, columns, *args)
+    # def queryCypher(self, cypherStmt:str, columns:list=None , params:tuple=None) -> ext.cursor :
+    #     return queryCypher(self.connection, self.graphName, cypherStmt, columns, params)
 
 
 
