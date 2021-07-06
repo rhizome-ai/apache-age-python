@@ -54,7 +54,7 @@ SET search_path = ag_catalog, "$user", public;
 
 ### Usage
 * If you are familiar with Psycopg2 driver : Go to [Jupyter Notebook : Basic Sample](samples/apache-age-basic.ipynb) 
-* Simpler way to access Apache AGE [AGE Sample](https://github.com/apache/incubator-age/drivers/python/blob/main/samples/apache-age-note.ipynb) in Samples.
+* Simpler way to access Apache AGE [AGE Sample](samples/apache-age-note.ipynb) in Samples.
 * Agtype converting samples: [Agtype Sample](samples/apache-age-agtypes.ipynb) in Samples.
 
 ### License
