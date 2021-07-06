@@ -7,3 +7,4 @@ dist/
 build/
 antlr/.antlr
 /exp2/
+.DS_Store
