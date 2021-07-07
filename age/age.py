@@ -113,6 +113,12 @@ def execCypher(conn:ext.connection, graphName:str, cypherStmt:str, cols:list=Non
         conn.rollback()
         raise SqlExcutionError("Excution ERR[" + str(cause) +"](" + stmt +")", cause)
 
+
+def cypher(cursor:ext.cursor, graphName:str, cypherStmt:str, cols:list=None, params:tuple=None) -> ext.cursor :
+    stmt = buildCypher(graphName, cypherStmt, cols)
+    cursor.execute(stmt, params)
+
+
 # def execCypherWithReturn(conn:ext.connection, graphName:str, cypherStmt:str, columns:list=None , params:tuple=None) -> ext.cursor :
 #     stmt = buildCypher(graphName, cypherStmt, columns)
 #     return execSql(conn, stmt, False, params)
@@ -150,6 +156,9 @@ class Age:
     
     def execCypher(self, cypherStmt:str, cols:list=None, params:tuple=None) -> ext.cursor :
         return execCypher(self.connection, self.graphName, cypherStmt, cols=cols, params=params)
+
+    def cypher(self, cursor:ext.cursor, cypherStmt:str, cols:list=None, params:tuple=None) -> ext.cursor :
+        return cypher(cursor, self.graphName, cypherStmt, cols=cols, params=params)
 
     # def execSql(self, stmt:str, commit:bool=False, params:tuple=None) -> ext.cursor :
     #     return execSql(self.connection, stmt, commit, params)

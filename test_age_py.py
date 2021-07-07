@@ -122,26 +122,37 @@ class TestAgeBasic(unittest.TestCase):
         # You must commit explicitly
         ag.commit()
 
-    def testEdge(self):
+    
+    def testCypher(self):
         ag = self.ag
 
-        ag.execCypher("CREATE (n:Person {name: %s}) ", params=('Jone',))
-        ag.execCypher("CREATE (n:Person {name: %s}) ", params=('Jack',))
-        ag.execCypher("CREATE (n:Person {name: %s}) ", params=('Andy',))
-        ag.execCypher("CREATE (n:Person {name: %s}) ", params=('Smith',))
-        ag.execCypher("CREATE (n:Person {name: %s}) ", params=('Tom',))
+        with ag.connection.cursor() as cursor:
+            try :
+                ag.cypher(cursor, "CREATE (n:Person {name: %s}) ", params=('Jone',))
+                ag.cypher(cursor, "CREATE (n:Person {name: %s}) ", params=('Jack',))
+                ag.cypher(cursor, "CREATE (n:Person {name: %s}) ", params=('Andy',))
+                ag.cypher(cursor, "CREATE (n:Person {name: %s}) ", params=('Smith',))
+                ag.cypher(cursor, "CREATE (n:Person {name: %s}) ", params=('Tom',))
 
-        # You must commit explicitly
-        ag.commit()
+                # You must commit explicitly
+                ag.commit()
+            except Exception as ex:
+                print(ex)
+                ag.rollback()
 
-        # Create Edges
-        ag.execCypher("MATCH (a:Person), (b:Person) WHERE a.name = 'Joe' AND b.name = 'Smith' CREATE (a)-[r:workWith {weight: 3}]->(b)")
-        ag.execCypher("MATCH (a:Person), (b:Person) WHERE  a.name = 'Andy' AND b.name = 'Tom' CREATE (a)-[r:workWith {weight: 1}]->(b)")
-        ag.execCypher("MATCH (a:Person {name: 'Jack'}), (b:Person {name: 'Andy'}) CREATE (a)-[r:workWith {weight: 5}]->(b)")
+        with ag.connection.cursor() as cursor:
+            try :# Create Edges
+                ag.cypher(cursor,"MATCH (a:Person), (b:Person) WHERE a.name = 'Joe' AND b.name = 'Smith' CREATE (a)-[r:workWith {weight: 3}]->(b)")
+                ag.cypher(cursor,"MATCH (a:Person), (b:Person) WHERE  a.name = 'Andy' AND b.name = 'Tom' CREATE (a)-[r:workWith {weight: 1}]->(b)")
+                ag.cypher(cursor,"MATCH (a:Person {name: 'Jack'}), (b:Person {name: 'Andy'}) CREATE (a)-[r:workWith {weight: 5}]->(b)")
 
-        # You must commit explicitly
-        ag.commit()
+                # You must commit explicitly
+                ag.commit()
+            except Exception as ex:
+                print(ex)
+                ag.rollback()
         
+
         # With Params
         cursor = ag.execCypher("""MATCH (a:Person), (b:Person) 
                 WHERE  a.name = %s AND b.name = %s 
@@ -158,6 +169,55 @@ class TestAgeBasic(unittest.TestCase):
         for row in cursor:
             print(row[0])
             
+
+
+    def testMultipleEdges(self):
+        ag = self.ag
+        with ag.connection.cursor() as cursor:
+            try :
+                ag.cypher(cursor, "CREATE (n:Country {name: %s}) ", params=('USA',))
+                ag.cypher(cursor, "CREATE (n:Country {name: %s}) ", params=('France',))
+                ag.cypher(cursor, "CREATE (n:Country {name: %s}) ", params=('Korea',))
+                ag.cypher(cursor, "CREATE (n:Country {name: %s}) ", params=('Russia',))
+
+                # You must commit explicitly after all executions.
+                ag.connection.commit()
+            except Exception as ex:
+                ag.rollback()
+                raise ex
+
+        with ag.connection.cursor() as cursor:
+            try :# Create Edges
+                ag.cypher(cursor,"MATCH (a:Country), (b:Country) WHERE a.name = 'USA' AND b.name = 'France' CREATE (a)-[r:distance {unit:'miles', value: 4760}]->(b)")
+                ag.cypher(cursor,"MATCH (a:Country), (b:Country) WHERE  a.name = 'France' AND b.name = 'Korea' CREATE (a)-[r:distance {unit: 'km', value: 9228}]->(b)")
+                ag.cypher(cursor,"MATCH (a:Country {name: 'Korea'}), (b:Country {name: 'Russia'}) CREATE (a)-[r:distance {unit:'km', value: 3078}]->(b)")
+
+                # You must commit explicitly
+                ag.connection.commit()
+            except Exception as ex:
+                ag.rollback()
+                raise ex
+
+
+        cursor = ag.execCypher("""MATCH p=(:Country {name:"USA"})-[:distance]-(:Country)-[:distance]-(:Country) 
+                RETURN p""")
+
+        count = 0
+        for row in cursor:
+            path = row[0]
+            indent = ""
+            for e in path:
+                if e.gtype == age.TP_VERTEX:
+                    print(indent, e.label, e["name"])
+                elif e.gtype == age.TP_EDGE:
+                    print(indent, e.label, e["value"], e["unit"])
+                else:
+                    print(indent, "Unknown element.", e)
+                
+                count += 1
+                indent += " >"
+
+        self.assertEqual(5,count)
 
 if __name__ == '__main__':
     unittest.main()
