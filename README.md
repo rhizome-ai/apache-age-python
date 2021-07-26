@@ -55,8 +55,8 @@ python -m unittest -v test_agtypes.py
 * apache-age-python GitHub: https://github.com/rhizome-ai/apache-age-python
 
 ### Troubleshooting
-1.) Make sure AGE is installed. 
-2.) Check to see if AGE is loaded in PostgreSQL.
+1. Make sure AGE is installed. 
+2. Check to see if AGE is loaded in PostgreSQL.
 ```
 # psql 
 CREATE EXTENSION age;
@@ -64,4 +64,4 @@ LOAD 'age';
 SET search_path = ag_catalog, "$user", public;
 ```
 ### License
-Apache-2.0 License
+[Apache-2.0 License](https://www.apache.org/licenses/LICENSE-2.0)
