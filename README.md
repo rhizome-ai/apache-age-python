@@ -11,13 +11,12 @@ Apache AGE is:
 - **Intelligent** -- AGE allows you to perform graph queries that are the basis for many next level web services such as fraud & intrustion detection, master data management, product recommendations, identity and relationship management, experience personalization, knowledge management and more.
 
 ### Features
-* Unmarshal AGE result data (AGType) to Vertex, Edge, Path
 * Cypher query support for Psycopg2 PostreSQL driver (enables cypher queries directly)
+* Deserialize AGE result (AGType) to Vertex, Edge, Path
 
 ### Requirements
 * Python 3.9 or higher
 * This module runs on [psycopg2](https://www.psycopg.org/) and [antlr4-python3](https://pypi.org/project/antlr4-python3-runtime/)
-Linux
 ```
 sudo apt-get update
 sudo apt-get install python3-dev libpq-dev
@@ -39,15 +38,15 @@ python setup.py install
 ```
 
 ### Getting Started
-* If you are familiar with Psycopg2: Go to [Jupyter Notebook: Basic Sample](samples/apache-age-basic.ipynb) 
-* Simple way to access Apache AGE [AGE Sample](samples/apache-age-note.ipynb) in Samples.
-* Agtype converting samples: [Agtype Sample](samples/apache-age-agtypes.ipynb) in Samples.
+* [Jupyter Notebook: Basic Examples](samples/apache-age-basic.ipynb) 
+* [Jupyter Notebook: More Complex Examples](samples/apache-age-note.ipynb)
 
 ### Tests
 ```
 python -m unittest -v test_age_py.py
 python -m unittest -v test_agtypes.py
 ```
+[Agtype data type conversion tests](samples/apache-age-agtypes.ipynb)
 
 ### For more information about [Apache AGE](https://age.apache.org/)
 * Apache Incubator Age: https://age.apache.org/
