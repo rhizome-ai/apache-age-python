@@ -31,8 +31,8 @@ pip install apache-age-python
 
 ### Build from Source
 ``` 
-git clone https://github.com/apache/incubator-age.git
-cd incubator-age/dirivers/python
+git clone https://github.com/rhizome-ai/apache-age-python
+cd apache-age-python
 
 python setup.py install
 ```
