@@ -154,6 +154,11 @@ class Age:
         self.graphName = graph
         return self
 
+    def connect_new(self, graph, conn):
+        setUpAge(conn, graph)
+        self.connection = conn
+        self.graphName = graph
+
     def close(self):
         self.connection.close()
 

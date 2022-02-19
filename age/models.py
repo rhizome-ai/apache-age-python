@@ -61,6 +61,8 @@ class AGObj:
 class Path(AGObj):
     entities = []
     def __init__(self, entities=None) -> None:
+        self._nodes = [each_node for each_node in entities if each_node.gtype == TP_VERTEX]
+        self._edges = [each_edge for each_edge in entities if each_edge.gtype == TP_EDGE]
         self.entities = entities
 
     @property
