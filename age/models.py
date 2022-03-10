@@ -64,6 +64,14 @@ class Path(AGObj):
         self.entities = entities
 
     @property
+    def _nodes(self):
+        return [each_node for each_node in self.entities if each_node.gtype == TP_VERTEX]
+
+    @property
+    def _edges(self):
+        return [each_edge for each_edge in self.entities if each_edge.gtype == TP_EDGE]
+
+    @property
     def gtype(self):
         return TP_PATH
 
