@@ -30,7 +30,7 @@ setup(
     url              = 'https://github.com/rhizome-ai/apache-age-python',
     download_url     = 'https://github.com/rhizome-ai/apache-age-python/releases/' ,
     license          = 'Apache2.0',
-    install_requires = [ 'psycopg2', 'antlr4-python3-runtime' ],
+    install_requires = [ 'psycopg2', 'antlr4-python3-runtime==4.9.2' ],
     packages         = ['age', 'age.gen'],
     keywords         = ['Graph Database', 'Apache AGE', 'PostgreSQL'],
     python_requires  = '>=3.9',
