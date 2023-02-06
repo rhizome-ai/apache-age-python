@@ -9,7 +9,7 @@ jobs:
       age:
         image: apache/age
         env:
-          POSTGRES_PASSWORD: agnes
+          POSTGRES_PASSWORD: agens
           POSTGRES_USER: postgres
           POSTGRES_DB: postgres
         ports:
