@@ -1,0 +1,25 @@
+name: Run unit tests
+run-name: Testing ${{ github.actor }}'s changes
+on: [pull_request]
+jobs:
+  unit-test:
+    runs-on: ubuntu-latest
+
+    services:
+      age:
+        image: apache/age
+        env:
+          POSTGRES_PASSWORD: agnes
+          POSTGRES_USER: postgres
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+      - run: pip install antlr4-python3-runtime==4.9.2 psycopg2 
+      - name: Run tests
+        run: python -m unittest -v test_age_py test_agtypes.py
