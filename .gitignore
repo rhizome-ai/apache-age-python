@@ -21,6 +21,7 @@ apache_age_python.egg-info/
 dist/
 build/
 .DS_Store
+.idea/
 
 # antlr generated files
 **/.antlr/
