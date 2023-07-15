@@ -1,0 +1,4 @@
+psycopg2 --no-binary :all: psycopg2
+antlr4-python3-runtime==4.11.1
+setuptools
+wheel
